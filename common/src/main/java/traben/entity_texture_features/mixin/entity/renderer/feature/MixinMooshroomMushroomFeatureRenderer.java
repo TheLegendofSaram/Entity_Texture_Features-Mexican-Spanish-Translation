@@ -1,5 +1,11 @@
 package traben.entity_texture_features.mixin.entity.renderer.feature;
 
+#if MC >= MC_21_5
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+#else
+import net.minecraft.client.resources.model.BakedModel;
+#endif
+
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -13,7 +19,6 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.MushroomCowMushroomLayer;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -175,8 +180,11 @@ public abstract class MixinMooshroomMushroomFeatureRenderer {
 
     //rewritten as original didn't seem to work, I must have accidentally changed the vanilla mushroom texture when testing originally
     @Inject(method = "renderMushroomBlock", at = @At(value = "HEAD"), cancellable = true)
+    #if MC >= MC_21_5
+    private void etf$injected(final PoseStack matrices, final MultiBufferSource vertexConsumers, final int light, final boolean renderAsModel, final BlockState mushroomState, final int overlay, final BlockStateModel mushroomModel, final CallbackInfo ci) {
+    #else
     private void etf$injected(PoseStack matrices, MultiBufferSource vertexConsumers, int light, boolean renderAsModel, BlockState mushroomState, int overlay, BakedModel mushroomModel, CallbackInfo ci) {
-
+    #endif
         Boolean shroomType = entity_texture_features$returnRedTrueBrownFalseVanillaNull(mushroomState);
         if (shroomType != null) {
             ETFTexture thisTexture = shroomType ? ETFManager.getInstance().redMooshroomAlt : ETFManager.getInstance().brownMooshroomAlt;

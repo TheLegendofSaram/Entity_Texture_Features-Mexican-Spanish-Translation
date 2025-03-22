@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,26 +32,37 @@ import traben.entity_texture_features.features.player.ETFPlayerTexture;
 @Mixin(SkullBlockRenderer.class)
 public abstract class MixinSkullBlockEntityRenderer implements BlockEntityRenderer<BedBlockEntity> {
 
+    #if MC >= MC_21_5
+    private static final String RENDER_METHOD = "render(Lnet/minecraft/world/level/block/entity/SkullBlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/world/phys/Vec3;)V";
+    #else
+    private static final String RENDER_METHOD = "render(Lnet/minecraft/world/level/block/entity/SkullBlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V";
+    #endif
 
     @Unique
     private ETFPlayerTexture entity_texture_features$thisETFPlayerTexture = null;
 
 
-    @Inject(method = "render(Lnet/minecraft/world/level/block/entity/SkullBlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V",
+    @Inject(method = RENDER_METHOD,
             at = @At(value = "HEAD"))
-    private void etf$markNotToChange(SkullBlockEntity skullBlockEntity, float f, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, int j, CallbackInfo ci) {
+    private void etf$markNotToChange(CallbackInfo ci) {
         ETFRenderContext.allowTexturePatching();
     }
 
-    @Inject(method = "render(Lnet/minecraft/world/level/block/entity/SkullBlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V",
+    @Inject(method = RENDER_METHOD,
             at = @At(value = "RETURN"))
-    private void etf$markAllowedToChange(SkullBlockEntity skullBlockEntity, float f, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, int j, CallbackInfo ci) {
+    private void etf$markAllowedToChange(CallbackInfo ci) {
         ETFRenderContext.allowRenderLayerTextureModify();
         ETFRenderContext.preventTexturePatching();
     }
 
-    #if MC >= MC_20_6
-        @Inject(method = "render(Lnet/minecraft/world/level/block/entity/SkullBlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V",
+    #if MC >= MC_21_5
+    @Inject(method = RENDER_METHOD,
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/blockentity/SkullBlockRenderer;getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;)Lnet/minecraft/client/renderer/RenderType;"),
+            locals = LocalCapture.CAPTURE_FAILHARD)
+    private void etf$alterTexture(final SkullBlockEntity skullBlockEntity, final float f, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int i, final int j, final Vec3 vec3, final CallbackInfo ci, final float g, final BlockState blockState, final boolean bl, final Direction direction, final int k, final float h, final SkullBlock.Type skullType, final SkullModelBase skullBlockEntityModel) {
+    #elif MC >= MC_20_6
+        @Inject(method = RENDER_METHOD,
                 at = @At(value = "INVOKE",
                         target = "Lnet/minecraft/client/renderer/blockentity/SkullBlockRenderer;getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;)Lnet/minecraft/client/renderer/RenderType;"),
                 locals = LocalCapture.CAPTURE_FAILHARD)
@@ -60,7 +72,7 @@ public abstract class MixinSkullBlockEntityRenderer implements BlockEntityRender
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/blockentity/SkullBlockRenderer;getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/client/renderer/RenderType;"),
             locals = LocalCapture.CAPTURE_FAILHARD)
     private void etf$alterTexture(final SkullBlockEntity skullBlockEntity, final float partialTick, final PoseStack poseStack, final MultiBufferSource buffer, final int packedLight, final int packedOverlay, final CallbackInfo ci, final float f, final BlockState blockState, final boolean bl, final Direction direction, final int i, final float g, final SkullBlock.Type skullType, final SkullModelBase skullModelBase) {
-#endif
+    #endif
 
         entity_texture_features$thisETFPlayerTexture = null;
 
@@ -83,10 +95,14 @@ public abstract class MixinSkullBlockEntityRenderer implements BlockEntityRender
         }
     }
 
-    @Inject(method = "render(Lnet/minecraft/world/level/block/entity/SkullBlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V",
+    @Inject(method = RENDER_METHOD,
             at = @At(value = "TAIL"),
             locals = LocalCapture.CAPTURE_FAILHARD)
+    #if MC >= MC_21_5
+    private void etf$renderFeatures(final SkullBlockEntity skullBlockEntity, final float f, final PoseStack matrixStack, final MultiBufferSource vertexConsumerProvider, final int i, final int j, final Vec3 vec3, final CallbackInfo ci, final float g, final BlockState blockState, final boolean bl, final Direction direction, final int k, final float h, final SkullBlock.Type skullType, final SkullModelBase skullBlockEntityModel, final RenderType renderType) {
+    #else
     private void etf$renderFeatures(SkullBlockEntity skullBlockEntity, float f, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, int j, CallbackInfo ci, float g, BlockState blockState, boolean bl, Direction direction, int k, float h, SkullBlock.Type skullType, SkullModelBase skullBlockEntityModel, RenderType renderLayer) {
+    #endif
         if (entity_texture_features$thisETFPlayerTexture != null && ETF.config().getConfig().enableEmissiveBlockEntities) {
             //vanilla positional code copy
             matrixStack.pushPose();
@@ -106,7 +122,7 @@ public abstract class MixinSkullBlockEntityRenderer implements BlockEntityRender
 
     }
 
-    @ModifyArg(method = "render(Lnet/minecraft/world/level/block/entity/SkullBlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V",
+    @ModifyArg(method = RENDER_METHOD,
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/client/renderer/blockentity/SkullBlockRenderer;renderSkull(Lnet/minecraft/core/Direction;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/model/SkullModelBase;Lnet/minecraft/client/renderer/RenderType;)V")
             , index = 7)

@@ -327,7 +327,7 @@ public abstract class ETFUtils2 {
 
             Minecraft.getInstance().getTextureManager().release(identifier);
 
-            DynamicTexture closableBackedTexture = new DynamicTexture(closableImage);
+            DynamicTexture closableBackedTexture = new DynamicTexture(#if MC>=MC_21_5 null, #endif closableImage);
             Minecraft.getInstance().getTextureManager().register(identifier, closableBackedTexture);
 
             return true;

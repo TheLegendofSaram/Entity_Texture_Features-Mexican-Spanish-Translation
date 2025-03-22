@@ -117,7 +117,7 @@ public class NBTProperty extends RandomProperty {
             boolean doesTestPass = finalNBTElement == null ? data.wantsBlank : data.tester.apply(finalNBTElement);
 
             if (data.print) {
-                String printString = finalNBTElement == null ? "<NBT component not found>" : finalNBTElement.getAsString();
+                String printString = finalNBTElement == null ? "<NBT component not found>" : getAsString(finalNBTElement);
                 ETFUtils2.logMessage(prefix+" property [single] print data: " + nbtPropertyEntry.getKey() + "=" + printString);
                 ETFUtils2.logMessage(prefix+" property [single] print result: " + (data.inverts != doesTestPass));
 
@@ -131,8 +131,16 @@ public class NBTProperty extends RandomProperty {
         return true;
     }
 
+    private static String getAsString(Tag nbt) {
+        return #if MC < MC_21_5 nbt.getAsString(); #else nbt.asString().orElse(""); #endif
+    }
+
+    private static Number getAsNumber(Tag nbt) {
+        return #if MC < MC_21_5 nbt.getAsNumber(); #else nbt.asNumber().orElse(0); #endif
+    }
+
     public String formatNbtPretty(CompoundTag nbt) {
-        String input = nbt.getAsString();
+        String input = getAsString(nbt);
         StringBuilder output = new StringBuilder();
         int indent = 1;
         boolean inString = false;
@@ -178,7 +186,7 @@ public class NBTProperty extends RandomProperty {
             }
             if (lastElement instanceof CompoundTag nbtCompound) {
                 lastElement = nbtCompound.get(instruction);
-            } else if (lastElement instanceof CollectionTag<?> nbtList) {
+            } else if (lastElement instanceof CollectionTag nbtList) {
                 lastElement = handleListInstruction(nbtList, instruction);
             } else {
                 ETFUtils2.logError("Invalid NBT instruction: " + instruction);
@@ -188,7 +196,7 @@ public class NBTProperty extends RandomProperty {
         return lastElement;
     }
 
-    private Tag handleListInstruction(CollectionTag<?> nbtList, String instruction) {
+    private Tag handleListInstruction(CollectionTag nbtList, String instruction) {
         if ("*".equals(instruction)) {
             return nbtList;
         } else if (isStringValidInt(instruction)) {
@@ -235,7 +243,7 @@ public class NBTProperty extends RandomProperty {
                         throw new RandomPropertyException("NBT failed, as raw: instruction was invalid: " + instruction);
 
                     return new NBTTester(invert,
-                            s -> matcher.testString(((Tag) s).getAsString()), blank, printSingle);
+                            s -> matcher.testString(getAsString((Tag) s)), blank, printSingle);
                 }
                 if (instruction.startsWith("exists:")) {
                     boolean exists = instruction.contains("exists:true");
@@ -246,7 +254,7 @@ public class NBTProperty extends RandomProperty {
                     SimpleIntegerArrayProperty.IntRange range = SimpleIntegerArrayProperty.getIntRange(instruction.replaceFirst("range:", ""));
                     return new NBTTester(invert, s -> {
                         if (s instanceof NumericTag nbtNumber) {
-                            return range.isWithinRange(nbtNumber.getAsNumber().intValue());
+                            return range.isWithinRange(getAsNumber(nbtNumber).intValue());
                         }
                         ETFUtils2.logWarn("Invalid range for non-number NBT: " + nbtId + "=" + instruction);
                         return false;
@@ -259,7 +267,7 @@ public class NBTProperty extends RandomProperty {
                     throw new RandomPropertyException("NBT failed, as instruction was invalid: " + instruction);
 
                 return new NBTTester(invert, s -> {
-                    String test = (s instanceof NumericTag) ? ((Tag) s).getAsString().replaceAll("[^\\d.]", "") : ((Tag) s).getAsString();
+                    String test = (s instanceof NumericTag) ? getAsString((Tag) s).replaceAll("[^\\d.]", "") : getAsString((Tag) s);
                     return matcher.testString(test);
                 }, false, false);
             } catch (RandomPropertyException e) {

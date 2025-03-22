@@ -1,7 +1,14 @@
 package traben.entity_texture_features.features.property_reading.properties.etf_properties;
 
+#if MC >= MC_21_5
+
+#else
+import net.minecraft.world.entity.VariantHolder;
+import net.minecraft.world.entity.animal.FrogVariant;
+#endif
 
 #if MC >= MC_20_6
+import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.level.block.entity.PotDecorations;
 #endif
 
@@ -9,9 +16,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.animal.CatVariant;
-import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.npc.VillagerType;
 #if MC < MC_20_6
 import net.minecraft.world.item.ItemStack;
@@ -55,7 +60,11 @@ public class VariantProperty extends StringArrayOrRegexProperty {
 
     public @Nullable String getValueFromEntity(ETFEntity etfEntity) {
         if (etfEntity instanceof Entity) {
+            #if MC >= MC_21_5
+            //todo 1.21.5? probably isn't needed anymore
+            #else
             if (etfEntity instanceof VariantHolder<?> variableEntity) {
+                Frog
                 if (variableEntity.getVariant() instanceof StringRepresentable stringIdentifiable) {
                     return stringIdentifiable.getSerializedName();
                 }
@@ -87,6 +96,7 @@ public class VariantProperty extends StringArrayOrRegexProperty {
                 }
                 return variableEntity.getVariant().toString();
             }
+            #endif
 
             return BuiltInRegistries.ENTITY_TYPE.getResourceKey(((Entity) etfEntity).getType()).map(key -> key.location().getPath()).orElse(null);
 
@@ -96,8 +106,6 @@ public class VariantProperty extends StringArrayOrRegexProperty {
                     && signBlockEntity.getBlockState().getBlock() instanceof SignBlock abstractSignBlock) {
                 return abstractSignBlock.type().name();
             }
-            //todo move colors to color property in etf maybe?
-            //it is actually useless in etf though, as they can already derive colour
             if (etfEntity instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity
                     && shulkerBoxBlockEntity.getBlockState().getBlock() instanceof ShulkerBoxBlock shulkerBoxBlock) {
                 return String.valueOf(shulkerBoxBlock.getColor());

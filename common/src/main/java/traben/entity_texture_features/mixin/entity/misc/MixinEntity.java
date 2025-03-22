@@ -6,6 +6,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+#if MC >= MC_21_5
+import net.minecraft.world.entity.EquipmentSlot;
+#endif
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
@@ -23,6 +26,9 @@ import org.spongepowered.asm.mixin.Unique;
 import traben.entity_texture_features.features.ETFRenderContext;
 import traben.entity_texture_features.utils.ETFEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Mixin(Entity.class)
@@ -140,7 +146,11 @@ public abstract class MixinEntity implements ETFEntity {
     public Iterable<ItemStack> etf$getItemsEquipped() {
         var alive = etf$getLivingOrNull();
         if (alive != null) {
+            #if MC>=MC_21_5
+            return alive.lastEquipmentItems.values();
+            #else
             return alive.getAllSlots();
+            #endif
         }
         return null;
     }
@@ -149,7 +159,18 @@ public abstract class MixinEntity implements ETFEntity {
     public Iterable<ItemStack> etf$getHandItems() {
         var alive = etf$getLivingOrNull();
         if (alive != null) {
+            #if MC>=MC_21_5
+            var equipment = alive.lastEquipmentItems;
+            var list = new ArrayList<ItemStack>();
+            for (Map.Entry<EquipmentSlot, ItemStack> entry : equipment.entrySet()) {
+                if (entry.getKey().getType() == EquipmentSlot.Type.HAND) {
+                    list.add(entry.getValue());
+                }
+            }
+            return list;
+            #else
             return alive.getHandSlots();
+            #endif
         }
         return null;
     }
@@ -158,7 +179,18 @@ public abstract class MixinEntity implements ETFEntity {
     public Iterable<ItemStack> etf$getArmorItems() {
         var alive = etf$getLivingOrNull();
         if (alive != null) {
+            #if MC>=MC_21_5
+            var equipment = alive.lastEquipmentItems;
+            var list = new ArrayList<ItemStack>();
+            for (Map.Entry<EquipmentSlot, ItemStack> entry : equipment.entrySet()) {
+                if (entry.getValue() != null && (entry.getKey().getType() == EquipmentSlot.Type.HUMANOID_ARMOR || entry.getKey().getType() == EquipmentSlot.Type.ANIMAL_ARMOR)) {
+                    list.add(entry.getValue());
+                }
+            }
+            return list;
+            #else
             return alive.getArmorSlots();
+            #endif
         }
         return null;
     }

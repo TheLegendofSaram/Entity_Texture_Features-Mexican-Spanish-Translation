@@ -16,6 +16,10 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+#if MC >= MC_21_5
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.EquipmentSlot;
+#endif
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -170,15 +174,24 @@ public class ETFPlayerFeatureRenderer<T extends Player, M extends PlayerModel<T>
     }
 
     private void renderCoat(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, ETFPlayerTexture playerTexture, M model) {
-        ItemStack armour = playerTexture.player.etf$getInventory().getArmor(1);
+        ItemStack armour = playerTexture.player.etf$getInventory()
+                #if MC >= MC_21_5
+                .getItem(EquipmentSlot.LEGS.getIndex(36));
+                #else
+                .getArmor(1);
+                #endif
         if (playerTexture.coatIdentifier != null &&
                 playerTexture.player.etf$isPartVisible(PlayerModelPart.JACKET) &&
+                #if MC >= 0
+                !(armour.is(ItemTags.LEG_ARMOR)) //todo check all versions for the else, might have just been written before i learned about tags
+                #else
                 !(armour.is(Items.CHAINMAIL_LEGGINGS) ||
                         armour.is(Items.LEATHER_LEGGINGS) ||
                         armour.is(Items.DIAMOND_LEGGINGS) ||
                         armour.is(Items.GOLDEN_LEGGINGS) ||
                         armour.is(Items.IRON_LEGGINGS) ||
                         armour.is(Items.NETHERITE_LEGGINGS))
+                #endif
         ) {
             //String coat = ETFPlayerSkinUtils.SKIN_NAMESPACE + id + "_coat.png";
 

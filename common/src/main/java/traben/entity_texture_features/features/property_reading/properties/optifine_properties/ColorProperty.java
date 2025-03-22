@@ -1,13 +1,19 @@
 package traben.entity_texture_features.features.property_reading.properties.optifine_properties;
 
 
-import net.minecraft.client.renderer.entity.LlamaRenderer;
-import net.minecraft.tags.ItemTags;
+#if MC >= MC_21_5
+import net.minecraft.world.entity.animal.sheep.Sheep;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+#else
 import net.minecraft.world.entity.VariantHolder;
-import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.Sheep;
-import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.client.renderer.entity.LlamaRenderer;
+#endif
+
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.item.BlockItem;
@@ -25,14 +31,14 @@ import java.util.Properties;
 public class ColorProperty extends StringArrayOrRegexProperty {
 
 
-    protected ColorProperty(Properties properties, int propertyNum) throws RandomProperty.RandomPropertyException {
+    protected ColorProperty(Properties properties, int propertyNum) throws RandomPropertyException {
         super(RandomProperty.readPropertiesOrThrow(properties, propertyNum, "colors", "collarColors"));
     }
 
     public static ColorProperty getPropertyOrNull(Properties properties, int propertyNum) {
         try {
             return new ColorProperty(properties, propertyNum);
-        } catch (RandomProperty.RandomPropertyException e) {
+        } catch (RandomPropertyException e) {
             return null;
         }
     }
@@ -45,10 +51,9 @@ public class ColorProperty extends StringArrayOrRegexProperty {
 
     @Override
     @Nullable
-    protected String getValueFromEntity(ETFEntity entity) {
+    protected String getValueFromEntity(ETFEntity entity) {//todo clean this up
         if (entity != null) {
-            if (entity instanceof Wolf wolf) return wolf.getCollarColor().getName();
-            if (entity instanceof Sheep sheep) return sheep.getColor().getName();
+
             if (entity instanceof Llama llama) {
 
                 DyeColor str;
@@ -75,6 +80,17 @@ public class ColorProperty extends StringArrayOrRegexProperty {
                     return str.getName();
                 }
             }
+            #if MC >= MC_21_5
+            return switch (entity) {
+                case Wolf wolf -> wolf.getCollarColor().getName();
+                case Sheep sheep-> sheep.getColor().getName();
+                case TropicalFish fishy -> fishy.getBaseColor().getName();
+                //todo: investigate alternative to the generic VariantHolder below
+                default -> null;
+            };
+            #else
+            if (entity instanceof Wolf wolf) return wolf.getCollarColor().getName();
+            if (entity instanceof Sheep sheep) return sheep.getColor().getName();
             if (entity instanceof TropicalFish fishy) {
                 DyeColor str = TropicalFish.getBaseColor(fishy.getVariant().getPackedId());
                 return str.getName();
@@ -91,6 +107,8 @@ public class ColorProperty extends StringArrayOrRegexProperty {
                 } catch (Exception ignored) {
                 }
             }
+            #endif
+
         }
         return null;
     }

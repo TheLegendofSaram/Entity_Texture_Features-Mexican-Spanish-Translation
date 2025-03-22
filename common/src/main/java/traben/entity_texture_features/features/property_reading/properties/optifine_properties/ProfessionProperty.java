@@ -30,8 +30,9 @@ public class ProfessionProperty extends StringArrayOrRegexProperty {
     @Override
     public boolean testEntityInternal(ETFEntity entity) {
         if (entity instanceof VillagerDataHolder villagerEntity) {
-            String entityProfession = villagerEntity.getVillagerData().getProfession().toString().toLowerCase().replace("minecraft:", "");
-            int entityProfessionLevel = villagerEntity.getVillagerData().getLevel();
+            String entityProfession = villagerEntity.getVillagerData() #if MC>=MC_21_5 .profession() #else .getProfession() #endif
+                    .toString().toLowerCase().replace("minecraft:", "");
+            int entityProfessionLevel = villagerEntity.getVillagerData() #if MC>=MC_21_5 .level(); #else .getLevel(); #endif
             boolean check = false;
             for (String str :
                     ARRAY) {
