@@ -92,7 +92,7 @@ public abstract class MixinArmorFeatureRenderer<T extends LivingEntity, M extend
             at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;"))
     private Object etf$setTrim(final Object t) {
         if (t instanceof EquipmentLayerRenderer.TrimSpriteKey trimSpriteKey){
-            etf$armorHandler.setTrim(trimSpriteKey.textureId());
+            etf$armorHandler.setTrim(trimSpriteKey #if MC>=MC_21_5 .spriteId() #else .textureId() #endif);
         }
         return t;
     }

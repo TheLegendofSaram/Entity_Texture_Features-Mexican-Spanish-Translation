@@ -1,5 +1,13 @@
 package traben.entity_texture_features.mixin.mods.sodium;
 
+import org.spongepowered.asm.mixin.Mixin;
+
+#if MC >= MC_21_5 //todo seems to be no longer needed as sodium mixins to Cube now
+import traben.entity_texture_features.ETFException;
+@Mixin(value = ETFException.class)
+public abstract class MixinModelPartSodium { }
+#else
+
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -9,7 +17,6 @@ import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,6 +36,7 @@ import traben.entity_texture_features.utils.ETFVertexConsumer;
  */
 @Pseudo
 @Mixin(value = EntityRenderer.class)
+
 public abstract class MixinModelPartSodium {
 
     @SuppressWarnings("EmptyMethod")
@@ -100,3 +108,4 @@ public abstract class MixinModelPartSodium {
 
     #endif
 }
+#endif
