@@ -118,8 +118,8 @@ public class NBTProperty extends RandomProperty {
 
             if (data.print) {
                 String printString = finalNBTElement == null ? "<NBT component not found>" : getAsString(finalNBTElement);
-                ETFUtils2.logMessage(prefix+" property [single] print data: " + nbtPropertyEntry.getKey() + "=" + printString);
-                ETFUtils2.logMessage(prefix+" property [single] print result: " + (data.inverts != doesTestPass));
+                ETFUtils2.logMessage(prefix+" NBT property [single] print data: " + nbtPropertyEntry.getKey() + "=" + printString);
+                ETFUtils2.logMessage(prefix+" NBT property [single] print result: " + (data.inverts != doesTestPass));
 
             }
             //break if test fails
@@ -132,7 +132,7 @@ public class NBTProperty extends RandomProperty {
     }
 
     private static String getAsString(Tag nbt) {
-        return #if MC < MC_21_5 nbt.getAsString(); #else nbt.asString().orElse(""); #endif
+        return #if MC < MC_21_5 nbt.getAsString(); #else nbt.toString(); #endif
     }
 
     private static Number getAsNumber(Tag nbt) {
@@ -269,7 +269,7 @@ public class NBTProperty extends RandomProperty {
                 return new NBTTester(invert, s -> {
                     String test = (s instanceof NumericTag) ? getAsString((Tag) s).replaceAll("[^\\d.]", "") : getAsString((Tag) s);
                     return matcher.testString(test);
-                }, false, false);
+                }, false, printSingle);
             } catch (RandomPropertyException e) {
                 throw e;
             } catch (Exception e) {
