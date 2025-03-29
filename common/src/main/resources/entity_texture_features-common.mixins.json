@@ -26,6 +26,7 @@
     "entity.misc.MixinPhantomEntity",
     "entity.misc.MixinPlayerEntity",
     "entity.misc.MixinSkullBlockEntity",
+    "entity.renderer.MixinEndCrystalRenderer",
     "entity.renderer.MixinEnderDragonEntityRenderer",
     "entity.renderer.MixinEntityRenderer",
     "entity.renderer.MixinIllusionerRenderer",
