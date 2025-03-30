@@ -66,6 +66,10 @@ public class RandomProperties {
                 RandomPropertyFactory.of("modLoaded", "config.entity_texture_features.property_explanation.mod_rule", ModLoadedProperty::getPropertyOrNull),
                 RandomPropertyFactory.of("nbtClient", "config.entity_texture_features.property_explanation.nbt_client", NBTClientProperty::getPropertyOrNull),
                 RandomPropertyFactory.of("minecraftVersion", "config.entity_texture_features.property_explanation.mc_version", MinecraftVersionProperty::getPropertyOrNull),
+                RandomPropertyFactory.of("Difficulty", "config.entity_texture_features.property_explanation.difficulty", DifficultyProperty::getPropertyOrNull),
+                RandomPropertyFactory.of("regionalDifficulty", "config.entity_texture_features.property_explanation.regional_difficulty", RegionalDifficultyProperty::getPropertyOrNull),
+                RandomPropertyFactory.of("clientGameMode", "config.entity_texture_features.property_explanation.client_game_mode", ClientGameModeProperty::getPropertyOrNull),
+                RandomPropertyFactory.of("hardcore", "config.entity_texture_features.property_explanation.hardcore", HardcoreProperty::getPropertyOrNull),
 
 
                 //OptiFine properties
